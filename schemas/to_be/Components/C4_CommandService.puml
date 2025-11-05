@@ -1,0 +1,34 @@
+@startuml
+title CommandService - Component Diagram
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(CommandService, "Command Service") {
+
+  Component(CommandAPI, "Command API", "API для отправки команд устройствам")
+
+  Component(CommandProcessor, "Command Processor", "Обработчик и валидатор команд")
+
+  Component(DeviceStateManager, "Device State Manager", "Управление состоянием устройств")
+
+  Component(CommandRouter, "Command Router", "Маршрутизация команд на соответствующие устройства")
+
+  Component(CommandRepository, "Command Repository", "Хранение истории команд")
+
+  Component(CommandEventConsumer, "Event Consumer", "Чтение событий из Message Bus")
+
+}
+
+ContainerDb(CommandDb, "CommandDB", "PostgreSQL", "Хранит историю команд и состояния устройств")
+
+Container(MessageBus, "Message Bus", "Apache Kafka", "Передача событий между сервисами")
+
+Rel(CommandAPI, CommandProcessor, "Отправляет команды")
+Rel(CommandProcessor, DeviceStateManager, "Проверяет состояние устройства")
+Rel(CommandProcessor, CommandRouter, "Маршрутизирует команды")
+Rel(CommandProcessor, CommandRepository, "Сохраняет команды в историю")
+Rel(DeviceStateManager, CommandRepository, "Обновляет состояния")
+Rel(CommandRouter, MessageBus, "Публикует команды для шлюза")
+Rel(CommandRepository, CommandDb, "Чтение/запись")
+Rel(CommandEventConsumer, DeviceStateManager, "Обновляет состояния по событиям")
+Rel(CommandEventConsumer, MessageBus, "Подписывается на события устройств")
+@enduml

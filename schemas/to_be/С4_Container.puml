@@ -1,0 +1,65 @@
+@startuml
+
+title WarmHouse Container Diagram
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Пользователь", "Пользователь, управляет устройствами через веб-интерфейс")
+Person(support, "Специалист ТП", "Сотрудник компании, помогает с подключением устройств")
+System(WarmHouseSystem, "WarmHouse System", "Система управления, подключения, мониторинга устройств умного дома")
+
+Container_Boundary(WarmHouseSystem, "WarmHouse System") {
+  Container(WebApp, "Single Page Application", "React, TypeScript", "UI для управления умным домом")
+  Container(GatewayService, "API Gateway", , "Единая точка входа, маршрутизация")
+
+  Container(TelemetryService, "Сервис телеметрии", , "Обработка телеметрии")
+  Container(DeviceRegistry, "Сервис устройств", , "Регистрация устройств, хранение их типа, привязки и статуса")
+  Container(AuthService, "Сервис аутентификации", , "Управление пользователями, аутентификация, авторизация")
+  Container(ScenarioService, "Сервис сценариев", , "Управление автоматическими сценариями и правилами")
+  Container(CommandService, "Сервис команд", , "Управление состоянием устройств")
+  Container(DeviceGateway, "Шлюз", , "Шлюз для общения с физическими устройствами")
+
+  Container(MessageBus, "Message Bus", "Apache Kafka", "Асинхронная коммуникация между сервисами")
+
+  ContainerDb(AuthDb, "База пользователей", "PostgreSQL", "Хранит данные пользователей, роли, разрешения")
+  ContainerDb(DeviceDb, "База устройств", "PostgreSQL", "Хранит метаданные устройств, фактическое состояние")
+  ContainerDb(ScenarioDb, "База сценариев", "PostgreSQL", "Хранит сценарии, правила, триггеры")
+  ContainerDb(TelemetryDb, "База телеметрии", "PostgreSQL", "Хранит телеметрию, историю изменений")
+}
+
+System_Ext(PartnerApi, "API партнёров", "Внешние системы производителей устройств")
+System_Ext(SmartDevices, "Умные устройства", "Физические устройства в домах пользователей")
+
+' Основные связи
+Rel(user, WebApp, "Управляет устройствами, настраивает сценарии")
+Rel(support, WebApp, "Просматривает статистику, помогает пользователям")
+Rel(WebApp, GatewayService, "API вызовы")
+Rel(CommandService, DeviceGateway, "Отправка команд")
+Rel(TelemetryService, DeviceGateway, "Получение телеметрии")
+Rel(ScenarioService, CommandService, "Отправка немедленных команд")
+Rel(TelemetryService, DeviceRegistry, "Проверка метаданных устройства")
+
+' Gateway
+Rel(GatewayService, AuthService, "Проверка токенов")
+Rel(GatewayService, ScenarioService, "Управление сценариями")
+Rel(GatewayService, CommandService, "Управление состоянием устройств (отправка команд)")
+Rel(GatewayService, DeviceRegistry, "Управление устройствами")
+Rel(GatewayService, TelemetryService, "Запрос телеметрии")
+
+' BD
+Rel(AuthService, AuthDb, "Чтение/запись")
+Rel(ScenarioService, ScenarioDb, "Чтение/запись")
+Rel(DeviceRegistry, DeviceDb, "Чтение/запись")
+Rel(TelemetryService, TelemetryDb, "Чтение/запись")
+
+' Шина
+Rel(TelemetryService, MessageBus, "Публикует телеметрию")
+Rel(ScenarioService, MessageBus, "Подписывается на телеметрию, публикует команды")
+Rel(CommandService, MessageBus, "Подписывается на команды")
+
+' Внешние
+Rel(DeviceGateway, SmartDevices, "Обмен данными с устройствами")
+Rel_L(DeviceRegistry, PartnerApi, "Синхронизация устройств, проверка поддержки")
+@enduml

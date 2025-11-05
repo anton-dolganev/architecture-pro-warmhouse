@@ -1,0 +1,35 @@
+@startuml
+title ScenarioService - Component Diagram
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(ScenarioService, "Scenario Service") {
+
+  Component(ScenarioAPI, "Scenario API", "API для управления сценариями и правилами")
+
+  Component(ScenarioEngine, "Scenario Engine", "Движок выполнения сценариев и правил")
+
+  Component(RuleManager, "Rule Manager", "Управление правилами и условиями")
+
+  Component(ScenarioRepository, "Scenario Repository", "Хранение сценариев и их состояний")
+
+  Component(ScenarioEventConsumer, "Event Consumer", "Чтение событий из Message Bus")
+
+  Component(CommandPublisher, "Command Publisher", "Публикация команд по результатам сценариев")
+
+}
+
+ContainerDb(ScenarioDb, "ScenarioDB", "PostgreSQL", "Хранит сценарии, правила и их состояния")
+
+Container(MessageBus, "Message Bus", "Apache Kafka", "Передача событий между сервисами")
+
+Rel(ScenarioAPI, ScenarioEngine, "Управление сценариями")
+Rel(ScenarioAPI, RuleManager, "Управление правилами")
+Rel(ScenarioEngine, RuleManager, "Выполняет правила")
+Rel(ScenarioEngine, ScenarioRepository, "Сохраняет/загружает состояния")
+Rel(ScenarioEngine, CommandPublisher, "Публикует команды по триггерам")
+Rel(RuleManager, ScenarioRepository, "Сохраняет правила")
+Rel(ScenarioRepository, ScenarioDb, "Чтение/запись")
+Rel(ScenarioEventConsumer, ScenarioEngine, "Передает события для обработки")
+Rel(ScenarioEventConsumer, MessageBus, "Подписывается на события")
+Rel(CommandPublisher, MessageBus, "Публикует команды")
+@enduml

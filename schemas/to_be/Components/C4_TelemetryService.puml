@@ -1,0 +1,26 @@
+@startuml
+title TelemetryService - Component Diagram
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(TelemetryService, "Telemetry Service") {
+
+  Component(TelemetryAPI, "Telemetry API", "Принимает телеметрические данные от устройств через шлюз")
+
+  Component(TelemetryProcessor, "Telemetry Processor", "Обрабатывает и валидирует входящие телеметрические данные")
+
+  Component(TelemetryRepository, "Telemetry Repository", "Сохраняет телеметрию в базу данных")
+
+  Component(TelemetryEventPublisher, "Event Publisher", "Публикует события обработки телеметрии")
+
+}
+
+ContainerDb(TelemetryDb, "TelemetryDB", "TimescaleDB", "Хранит исторические данные телеметрии")
+
+Container(MessageBus, "Message Bus", "Передача событий между сервисами")
+
+Rel(TelemetryAPI, TelemetryProcessor, "Передает данные")
+Rel(TelemetryProcessor, TelemetryRepository, "Управление данными")
+Rel(TelemetryProcessor, TelemetryEventPublisher, "Публикует события")
+Rel(TelemetryRepository, TelemetryDb, "Чтение/запись")
+Rel(TelemetryEventPublisher, MessageBus, "Публикует события")
+@enduml
