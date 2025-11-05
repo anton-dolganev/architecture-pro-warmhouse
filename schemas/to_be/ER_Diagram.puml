@@ -1,0 +1,133 @@
+@startuml WarmHouse_ER_Diagram
+
+title ER-диаграмма WarmHouse System - Логическая модель данных
+
+entity "User" as user {
+  * user_id : UUID <<PK>>
+  --
+  * username : VARCHAR(50)
+  * email : VARCHAR(100)
+  * password_hash : VARCHAR(255)
+  phone_number : VARCHAR(20)
+  created_at : TIMESTAMP
+  last_login : TIMESTAMP
+  is_active : BOOLEAN
+}
+
+entity "House" as house {
+  * house_id : UUID <<PK>>
+  * owner_id : UUID <<FK>>
+  --
+  * name : VARCHAR(100)
+  address : TEXT
+  timezone : VARCHAR(50)
+  location : GEOGRAPHY(POINT)
+  created_at : TIMESTAMP
+}
+
+entity "DeviceType" as device_type {
+  * device_type_id : UUID <<PK>>
+  --
+  * manufacturer : VARCHAR(100)
+  * model : VARCHAR(100)
+  * category : VARCHAR(50)
+  description : TEXT
+  supported_commands : JSONB
+  capabilities : JSONB
+  firmware_versions : JSONB
+}
+
+entity "Device" as device {
+  * device_id : UUID <<PK>>
+  * device_type_id : UUID <<FK>>
+  * house_id : UUID <<FK>>
+  --
+  * name : VARCHAR(100)
+  serial_number : VARCHAR(100)
+  firmware_version : VARCHAR(50)
+  is_online : BOOLEAN
+  last_seen : TIMESTAMP
+  ip_address : INET
+  configuration : JSONB
+  status : VARCHAR(20)
+  created_at : TIMESTAMP
+}
+
+entity "TelemetryData" as telemetry {
+  * telemetry_id : UUID <<PK>>
+  * device_id : UUID <<FK>>
+  * module_id : UUID <<FK>>
+  --
+  * timestamp : TIMESTAMP
+  * measurements : JSONB
+  metadata : JSONB
+  processed : BOOLEAN
+}
+
+entity "Scenario" as scenario {
+  * scenario_id : UUID <<PK>>
+  * house_id : UUID <<FK>>
+  * created_by : UUID <<FK>>
+  --
+  * name : VARCHAR(100)
+  description : TEXT
+  is_active : BOOLEAN
+  trigger_conditions : JSONB
+  actions : JSONB
+  created_at : TIMESTAMP
+  last_triggered : TIMESTAMP
+}
+
+entity "Command" as command {
+  * command_id : UUID <<PK>>
+  * device_id : UUID <<FK>>
+  * issued_by : UUID <<FK>>
+  --
+  * command_type : VARCHAR(50)
+  parameters : JSONB
+  status : VARCHAR(20)
+  issued_at : TIMESTAMP
+  executed_at : TIMESTAMP
+  error_message : TEXT
+}
+
+entity "Alert" as alert {
+  * alert_id : UUID <<PK>>
+  * device_id : UUID <<FK>>
+  * house_id : UUID <<FK>>
+  --
+  * alert_type : VARCHAR(50)
+  * severity : VARCHAR(20)
+  * message : TEXT
+  triggered_at : TIMESTAMP
+  resolved_at : TIMESTAMP
+  is_acknowledged : BOOLEAN
+}
+
+entity "UserHouseAccess" as user_house_access {
+  * user_id : UUID <<PK>> <<FK>>
+  * house_id : UUID <<PK>> <<FK>>
+  --
+  access_level : VARCHAR(20)
+  granted_at : TIMESTAMP
+  granted_by : UUID <<FK>>
+}
+
+
+user ||--o{ house : "owns"
+user ||--o{ user_house_access : "has_access_to"
+house ||--o{ user_house_access : "shared_with"
+
+house ||--o{ device : "contains"
+house ||--o{ scenario : "has_scenarios_in"
+house ||--o{ alert : "has_alerts_in"
+
+device_type ||--o{ device : "classified_as"
+
+device ||--o{ telemetry : "generates"
+device ||--o{ command : "receives"
+device ||--o{ alert : "triggers"
+
+user ||--o{ command : "issues"
+user ||--o{ scenario : "creates"
+@enduml
