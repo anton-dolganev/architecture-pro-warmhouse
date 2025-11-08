@@ -51,6 +51,24 @@ services:
     networks:
       - smarthome-network
 
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: smarthome-gateway
+    depends_on:
+      - app
+      - temperature-api
+    ports:
+      - "8085:8085"
+    environment:
+      - PORT=8085
+      - MAIN_APP_URL=http://app:8080
+      - TEMPERATURE_API_URL=http://temperature-api:8081
+    restart: unless-stopped
+    networks:
+      - smarthome-network
+
 volumes:
   postgres_data:
 
