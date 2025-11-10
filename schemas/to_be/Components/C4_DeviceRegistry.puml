@@ -1,0 +1,34 @@
+@startuml
+title DeviceRegistry - Component Diagram
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+
+Container_Boundary(DeviceRegistry, "Device Registry Service") {
+
+  Component(DeviceAPI, "Device API", "Предоставляет API для управления устройствами: регистрация, получение статуса, обновление информации")
+
+  Component(DeviceManager, "Device Manager", "Логика: регистрация устройств, обновление статуса, связь с Partner API")
+
+  Component(MetadataService, "Metadata Service", "Обрабатывает метаданные устройств, запрашивает информацию у внешних систем (Partner API)")
+
+  Component(DeviceRepository, "Device Repository", "Доступ к данным в DeviceDB")
+
+  Component(EventPublisher, "Event Publisher", "Публикует события в Message Bus")
+
+}
+
+ContainerDb(DeviceDb, "DeviceDB", "PostgreSQL", "Хранит метаданные устройств и их состояния")
+
+System_Ext(PartnerAPI, "Partner API", "API производителей устройств")
+
+Container(MessageBus, "Message Bus", "Передача событий между сервисами")
+
+Rel(DeviceAPI, DeviceManager, "Вызывает")
+Rel(DeviceManager, MetadataService, "Получает дополнительные сведения")
+Rel(DeviceManager, DeviceRepository, "Чтение/запись")
+Rel(DeviceManager, EventPublisher, "Публикует события")
+Rel(MetadataService, PartnerAPI, "Запрашивает характеристики устройств")
+Rel(DeviceRepository, DeviceDb, "Чтение/запись")
+Rel(EventPublisher, MessageBus, "Публикует события")
+
+@enduml

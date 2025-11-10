@@ -1,0 +1,62 @@
+@startuml WarmHouse_Scenario_System_Code
+
+title WarmHouse - Система сценариев
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+class Scenario {
+  +String scenarioId
+  +String name
+  +String description
+  +boolean enabled
+  +List<Trigger> triggers
+  +List<Action> actions
+  +void execute()
+  +void validate()
+}
+
+class Trigger {
+  +String triggerId
+  +TriggerType type
+  +String sourceDeviceId
+  +Map<String, Object> conditions
+  +boolean evaluate()
+}
+
+class Action {
+  +String actionId
+  +String targetDeviceId
+  +String command
+  +Map<String, Object> parameters
+  +void execute()
+}
+
+class TriggerType {
+  +String typeName
+  +String description
+  +List<String> supportedOperators
+}
+
+class Condition {
+  +String field
+  +Operator operator
+  +Object value
+  +boolean check()
+}
+
+class RuleEngine {
+  +void processTelemetryEvent()
+  +void evaluateTriggers()
+  +void executeScenarios()
+  +List<Scenario> findMatchingScenarios()
+}
+
+Scenario "1" -- "1..*" Trigger : has
+Scenario "1" -- "1..*" Action : performs
+Trigger "1" -- "1" TriggerType : has
+Trigger "1" -- "0..*" Condition : has
+RuleEngine "1" -- "0..*" Scenario : manages
+
+@enduml

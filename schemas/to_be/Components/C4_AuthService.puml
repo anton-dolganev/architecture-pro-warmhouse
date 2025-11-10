@@ -1,0 +1,32 @@
+@startuml
+title AuthService - Component Diagram
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(AuthService, "Auth Service") {
+
+  Component(AuthAPI, "Auth API", "Предоставляет endpoints для аутентификации и управления пользователями")
+  
+  Component(AuthManager, "Auth Manager", "Логика аутентификации и авторизации")
+  
+  Component(UserManager, "User Manager", "Управление пользователями и ролями")
+  
+  Component(TokenService, "Token Service", "Генерация и валидация JWT токенов")
+  
+  Component(UserRepository, "User Repository", "Доступ к данным пользователей")
+  
+  Component(PermissionService, "Permission Service", "Управление правами доступа")
+
+}
+
+ContainerDb(AuthDb, "AuthDB", "PostgreSQL", "Хранит данные пользователей, ролей и разрешений")
+
+Rel(AuthAPI, AuthManager, "Вызывает для аутентификации")
+Rel(AuthAPI, UserManager, "Вызывает для управления пользователями")
+Rel(AuthManager, TokenService, "Генерирует/проверяет токены")
+Rel(AuthManager, PermissionService, "Проверяет права доступа")
+Rel(UserManager, UserRepository, "Управление данными пользователей")
+Rel(UserManager, PermissionService, "Управление правами доступа")
+Rel(TokenService, UserRepository, "Получает данные пользователя для токена")
+Rel(UserRepository, AuthDb, "Чтение/запись")
+Rel(PermissionService, AuthDb, "Чтение прав доступа")
+@enduml

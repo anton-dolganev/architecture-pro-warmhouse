@@ -1,0 +1,32 @@
+@startuml
+title DeviceGateway - Component Diagram
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(DeviceGateway, "Device Gateway Service") {
+
+  Component(GatewayAPI, "Gateway API", "Обрабатывает команды от внутренних сервисов и телеметрию от устройств")
+
+  Component(ConnectionManager, "Connection Manager", "Управляет постоянными соединениями с устройствами (WebSocket/MQTT)")
+
+  Component(DeviceProtocolHandler, "Device Protocol Handler", "Обрабатывает протоколы взаимодействия с различными типами устройств")
+
+  Component(TelemetryProcessor, "Telemetry Processor", "Принимает и нормализует данные телеметрии от устройств")
+
+  Component(CommandDispatcher, "Command Dispatcher", "Передаёт команды управления на устройства")
+
+}
+
+System_Ext(SmartDevices, "Smart Devices", "Физические устройства пользователей")
+System_Ext(SmartDevices, "Smart Devices", "Физические устройства пользователей")
+
+Container(TelemetryServie, "Сервис телеметрии", "Передает телеметрию")
+
+Rel(GatewayAPI, ConnectionManager, "Управляет подключениями")
+Rel(ConnectionManager, DeviceProtocolHandler, "Передаёт сообщения устройств")
+Rel(DeviceProtocolHandler, CommandDispatcher, "Получает команды для отправки устройствам")
+Rel(TelemetryProcessor, TelemetryServie, "Передает обработанные данные телеметрии")
+Rel(CommandDispatcher, ConnectionManager, "Отправляет команды через активные соединения")
+Rel(ConnectionManager, SmartDevices, "Устанавливает соединения и обменивается данными")
+Rel(ConnectionManager, TelemetryProcessor, "Передает сырые данные телеметрии")
+
+@enduml
