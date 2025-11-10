@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: WarmHouse Command Service API
+paths:
+  '/api/v1/devices/{deviceId}/commands':
+    post:
+      summary: Отправка команды устройству
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendCommandRequest'
+            examples:
+              turnOnHeater:
+                summary: Включение обогревателя
+                value:
+                  command: turn_on
+                  parameters:
+                    duration: 3600
+                    temperature: 22
+                  priority: high
+      responses:
+        '202':
+          description: Команда принята к исполнению
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandResponse'
+        '404':
+          description: Устройство не найдено
+        '422':
+          description: Устройство не поддерживает данную команду
+components:
+  schemas:
+    SendCommandRequest:
+      type: object
+      properties:
+        command:
+          type: string
+          example: turn_on
+        parameters:
+          type: object
+        priority:
+          type: string
+          enum:
+            - low
+            - normal
+            - high
+          default: normal
+      required:
+        - command
+    CommandResponse:
+      type: object
+      properties:
+        command_id:
+          type: string
+          format: uuid
+        device_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+            - pending
+            - executing
+            - completed
+            - failed
+        issued_at:
+          type: string
+          format: date-time
+        estimated_completion:
+          type: string
+          format: date-time

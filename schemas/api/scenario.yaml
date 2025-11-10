@@ -1,0 +1,112 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: WarmHouse Scenario Service API
+paths:
+  '/api/v1/houses/{houseId}/scenarios':
+    post:
+      summary: Создание нового сценария
+      parameters:
+        - name: houseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScenarioRequest'
+      responses:
+        '201':
+          description: Сценарий создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioResponse'
+  '/api/v1/scenarios/{scenarioId}/execute':
+    post:
+      summary: Немедленное выполнение сценария
+      parameters:
+        - name: scenarioId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '202':
+          description: Сценарий запущен
+        '404':
+          description: Сценарий не найден
+        '409':
+          description: Сценарий уже выполняется
+components:
+  schemas:
+    CreateScenarioRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Включение обогрева при низкой температуре
+        description:
+          type: string
+        triggers:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - telemetry_threshold
+                  - schedule
+                  - manual
+              conditions:
+                type: object
+        actions:
+          type: array
+          items:
+            type: object
+            properties:
+              device_id:
+                type: string
+                format: uuid
+              command:
+                type: string
+              parameters:
+                type: object
+        is_active:
+          type: boolean
+          default: true
+      required:
+        - name
+        - triggers
+        - actions
+    ScenarioResponse:
+      type: object
+      properties:
+        scenario_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        house_id:
+          type: string
+          format: uuid
+        is_active:
+          type: boolean
+        triggers:
+          type: array
+        actions:
+          type: array
+        execution_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        last_triggered:
+          type: string
+          format: date-time

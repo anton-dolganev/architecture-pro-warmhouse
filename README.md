@@ -69,7 +69,9 @@ AsyncAPI там где нужна асинхронность и отказоус
 
 ### 2. Документация API
 
-[STOPLIGHT](https://anton-d.stoplight.io/studio/warm-house:main)
+[AUTH](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/anton-dolganev/architecture-pro-warmhouse/warmhouse/schemas/api/auth.yaml)
+[COMMANDS](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/anton-dolganev/architecture-pro-warmhouse/warmhouse/schemas/api/commands.yaml)
+[SCENARIO](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/anton-dolganev/architecture-pro-warmhouse/warmhouse/schemas/api/scenario.yaml)
 
 # Задание 5. Работа с docker и docker-compose
 
